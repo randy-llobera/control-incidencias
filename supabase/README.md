@@ -111,7 +111,29 @@ ALTER TABLE incidents ENABLE ROW LEVEL SECURITY;
 ### 7. Create RLS Policies
 
 ```sql
+
 -- Users table policies
+
+-- Admins: can SELECT all rows
+create policy "Admins can view all users"
+on public.users for select
+using ( public.is_admin() );
+
+-- Admins: can INSERT any row
+create policy "Admins can insert users"
+on public.users for insert
+with check ( public.is_admin() );
+
+-- Admins: can UPDATE any row
+create policy "Admins can update users"
+on public.users for update
+using ( public.is_admin() );
+
+-- Admins: can DELETE any row
+create policy "Admins can delete users"
+on public.users for delete
+using ( public.is_admin() );
+
 CREATE POLICY "Users can view their own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
@@ -160,6 +182,29 @@ CREATE POLICY "Teachers can manage incidents" ON incidents
 ### 8. Create function to handle user creation
 
 ```sql
+
+--Helper function: returns true iff the current auth user is an admin
+-- NOTE: SECURITY DEFINER + owned by table owner avoids recursion.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.id = auth.uid()
+      and r.name = 'admin'
+  );
+$$;
+
+-- Lock down function and allow only app roles to call it
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated, anon;
+
 -- Function to create user profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

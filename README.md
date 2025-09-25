@@ -166,44 +166,7 @@ La base de datos se gestiona completamente a través de Supabase. Los cambios de
 
 ## Changelog
 
-### [2024-12-19] - Deployment Stability & Type System Improvements
-
-#### 🔧 **Critical Fixes Applied**
-- **Security Vulnerabilities**: Updated Next.js from 15.1.0 to 15.5.4, fixing 9 critical security vulnerabilities
-- **TypeScript Compilation**: Fixed 14 TypeScript errors related to missing nested properties in database queries
-- **Build Process**: Resolved EPERM build errors and async/await issues in supabase-server.ts
-- **ESLint Errors**: Cleaned up unused imports, variables, and fixed `any` type usage
-
-#### 🏗️ **Type System Migration**
-- **Supabase CLI Integration**: Migrated from custom types to proper Supabase-generated types (`src/types/supabase.ts`)
-- **Relationship Types**: Created utility types that leverage actual database relationships:
-  - `UserWithRole` - User with role information
-  - `StudentWithGroup` - Student with group information  
-  - `GroupWithUser` - Group with creator information
-  - `CategoryWithUser` - Category with creator information
-  - `IncidentWithDetails` - Incident with all related data
-- **Type Safety**: All database queries now use proper TypeScript types that match the actual schema
-
-#### 📁 **File Changes**
-- **`src/types/database.ts`**: Now imports and re-exports Supabase-generated types
-- **`src/types/supabase.ts`**: Auto-generated from database schema with relationship metadata
-- **`src/lib/supabase-server.ts`**: Fixed async/await issues for proper server-side rendering
-- **All page components**: Updated to use proper relationship types
-
-#### ✅ **Deployment Status**
-- **Build Success**: ✅ App compiles successfully without errors
-- **Type Safety**: ✅ All TypeScript errors resolved
-- **Security**: ✅ Critical vulnerabilities patched
-- **Code Quality**: ✅ ESLint errors fixed (7 warnings remain - non-blocking)
-
-#### ⚠️ **Remaining Items**
-- 7 React Hook dependency warnings (non-blocking for deployment)
-- Environment variables need to be configured for production deployment
-
-#### 🚀 **Ready for Production**
-The application is now stable and ready for deployment with proper type safety and security patches applied.
-
----
+For detailed information about changes, fixes, and updates, see [CHANGELOG.md](./CHANGELOG.md).
 
 ## Licencia
 
