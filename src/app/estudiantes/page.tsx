@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Student, Group, User } from '@/types/database'
+import { Student, Group } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function EstudiantesPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [groups, setGroups] = useState<Group[]>([])
-  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingStudent, setEditingStudent] = useState<Student | null>(null)
@@ -31,13 +30,11 @@ export default function EstudiantesPage() {
       return
     }
 
-    const { data: userData } = await supabase
+    await supabase
       .from('users')
       .select('*')
       .eq('id', authUser.id)
       .single()
-
-    setUser(userData)
   }
 
   const loadData = async () => {

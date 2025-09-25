@@ -2,45 +2,38 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Incident, User } from '@/types/database'
+import { IncidentWithDetails } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
-  const [incidents, setIncidents] = useState<Incident[]>([])
-  const [user, setUser] = useState<User | null>(null)
+  const [incidents, setIncidents] = useState<IncidentWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    checkUser()
-    loadData()
-  }, [])
+    const checkUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
+        router.push('/auth')
+        return
+      }
 
-  const checkUser = async () => {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (!authUser) {
-      router.push('/auth')
-      return
+      const { data: userData } = await supabase
+        .from('users')
+        .select(`
+          *,
+          roles(name)
+        `)
+        .eq('id', authUser.id)
+        .single()
+
+      // Check if user has permission (coordinator or admin)
+      if (userData?.roles?.name !== 'coordinator' && userData?.roles?.name !== 'admin') {
+        router.push('/incidentes')
+      }
     }
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select(`
-        *,
-        roles(name)
-      `)
-      .eq('id', authUser.id)
-      .single()
-
-    setUser(userData)
-
-    // Check if user has permission (coordinator or admin)
-    if (userData?.roles?.name !== 'coordinator' && userData?.roles?.name !== 'admin') {
-      router.push('/incidentes')
-    }
-  }
-
-  const loadData = async () => {
+    const loadData = async () => {
     try {
       const { data } = await supabase
         .from('incidents')
@@ -57,7 +50,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+    }
+
+    checkUser()
+    loadData()
+  }, [router])
 
   const getStats = () => {
     const total = incidents.length
@@ -67,13 +64,13 @@ export default function DashboardPage() {
       high: incidents.filter(i => i.severity === 'high').length
     }
 
-    const byCategory = incidents.reduce((acc, incident) => {
+    const byCategory: Record<string, number> = incidents.reduce((acc, incident) => {
       const categoryName = incident.categories?.name || 'Sin categoría'
       acc[categoryName] = (acc[categoryName] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
-    const byGroup = incidents.reduce((acc, incident) => {
+    const byGroup: Record<string, number> = incidents.reduce((acc, incident) => {
       const groupName = incident.students?.groups?.name || 'Sin grupo'
       acc[groupName] = (acc[groupName] || 0) + 1
       return acc

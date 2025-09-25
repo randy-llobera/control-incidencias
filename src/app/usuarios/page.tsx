@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { User, Role } from '@/types/database'
+import { Role, UserWithRole } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function UsuariosPage() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserWithRole[]>([])
   const [roles, setRoles] = useState<Role[]>([])
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -32,8 +31,6 @@ export default function UsuariosPage() {
       `)
       .eq('id', authUser.id)
       .single()
-
-    setCurrentUser(userData)
 
     // Check if user has permission (admin only)
     if (userData?.roles?.name !== 'admin') {

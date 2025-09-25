@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { User } from '@/types/database'
+import { UserWithRole } from '@/types/database'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 
 export default function Navigation() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserWithRole | null>(null)
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()

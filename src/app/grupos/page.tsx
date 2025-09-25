@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Group, User } from '@/types/database'
+import { Group, UserWithRole, GroupWithUser } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function GruposPage() {
-  const [groups, setGroups] = useState<Group[]>([])
-  const [user, setUser] = useState<User | null>(null)
+  const [groups, setGroups] = useState<GroupWithUser[]>([])
+  const [user, setUser] = useState<UserWithRole | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)

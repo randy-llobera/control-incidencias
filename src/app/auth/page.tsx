@@ -41,8 +41,8 @@ export default function AuthPage() {
         if (error) throw error
         alert('Revisa tu email para confirmar tu cuenta')
       }
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       setLoading(false)
     }

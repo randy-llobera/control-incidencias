@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Category, User } from '@/types/database'
+import { Category, UserWithRole, CategoryWithUser } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function CategoriasPage() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [user, setUser] = useState<User | null>(null)
+  const [categories, setCategories] = useState<CategoryWithUser[]>([])
+  const [user, setUser] = useState<UserWithRole | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
