@@ -167,7 +167,7 @@ DECLARE
   teacher_role_id UUID;
 BEGIN
   -- Get the teacher role ID
-  SELECT id INTO teacher_role_id FROM roles WHERE name = 'teacher' LIMIT 1;
+  SELECT id INTO teacher_role_id FROM public.roles WHERE name = 'teacher' LIMIT 1;
   
   -- Insert user with teacher role as default
   INSERT INTO public.users (id, role_id, display_name, school_role)
