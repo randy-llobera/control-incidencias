@@ -1,41 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { UserWithRole } from '@/types/database'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 
-export default function Navigation() {
-  const [user, setUser] = useState<UserWithRole | null>(null)
-  const [loading, setLoading] = useState(true)
+interface NavigationProps {
+  user: UserWithRole
+}
+
+export default function Navigation({ user }: NavigationProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-
-  useEffect(() => {
-    checkUser()
-  }, [])
-
-  const checkUser = async () => {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (!authUser) {
-      router.push('/auth')
-      return
-    }
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select(`
-        *,
-        roles(name)
-      `)
-      .eq('id', authUser.id)
-      .single()
-
-    setUser(userData)
-    setLoading(false)
-  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -65,18 +43,6 @@ export default function Navigation() {
     }
 
     return baseItems
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Cargando...</div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
   }
 
   const navigationItems = getNavigationItems()

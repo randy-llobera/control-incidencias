@@ -4,30 +4,62 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Navigation from './Navigation'
+import { UserWithRole } from '@/types/database'
 
 interface LayoutProps {
   children: React.ReactNode
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<UserWithRole | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
+    // Check the current session immediately on mount
     checkAuth()
+
+    // Subscribe to auth changes (login, logout, refresh)
+    const { data: subscription } = supabase.auth.onAuthStateChange(() => {
+      checkAuth()
+    })
+
+    // Cleanup: unsubscribe when Layout unmounts
+    return () => {
+      subscription.subscription.unsubscribe()
+    }
   }, [])
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    if (authUser) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select(`
+          *,
+          roles(name)
+        `)
+        .eq('id', authUser.id)
+        .single()
     
-    if (user && pathname !== '/auth') {
-      setIsAuthenticated(true)
-    } else if (!user && pathname !== '/auth' && pathname !== '/') {
-      router.push('/auth')
+      setUser(userData)
+    
+      // 🔹 Redirect if logged in but on "/" or "/auth"
+      if (pathname === '/' || pathname === '/auth') {
+        router.push('/incidentes')
+      }
+    } else {
+      setUser(null)
+    
+      // 🔹 Redirect to auth if not logged in and not already there
+      if (pathname !== '/auth' && pathname !== '/') {
+        router.push('/auth')
+      }
     }
     
+
     setLoading(false)
   }
 
@@ -39,11 +71,10 @@ export default function Layout({ children }: LayoutProps) {
     )
   }
 
-  // Show navigation for authenticated pages
-  if (isAuthenticated && pathname !== '/auth') {
+  if (user && pathname !== '/auth') {
     return (
       <div className="flex h-screen bg-gray-50">
-        <Navigation />
+        <Navigation user={user} />
         <div className="flex-1 flex flex-col overflow-hidden">
           <main className="flex-1 overflow-x-hidden overflow-y-auto">
             {children}
@@ -53,6 +84,5 @@ export default function Layout({ children }: LayoutProps) {
     )
   }
 
-  // Show full page for auth and home
   return <>{children}</>
 }
