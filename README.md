@@ -1,173 +1,223 @@
-# Control de Comportamiento
+# Student Behavior Management System
 
-Sistema de gestión de incidentes estudiantiles con roles de usuario (Profesor, Coordinador, Administrador).
+A comprehensive student incident management system with role-based user access (Teacher, Coordinator, Administrator). The application interface is in Spanish but all code, documentation, and configuration are in English.
 
-## Características
+## Features
 
-- **Autenticación**: Supabase Auth con registro de usuarios
-- **Roles**: Profesor (por defecto), Coordinador, Administrador
-- **Gestión de Incidentes**: Crear, filtrar y exportar incidentes
-- **Gestión de Estudiantes**: CRUD de estudiantes por profesores
-- **Gestión de Grupos y Categorías**: Por coordinadores y administradores
-- **Dashboard**: Estadísticas para coordinadores y administradores
-- **Gestión de Usuarios**: Asignación de roles por administradores
-- **Exportación CSV**: Filtros aplicables a la exportación
+- **Authentication**: Supabase Auth with user registration
+- **Role-based Access**: Teacher (default), Coordinator, Administrator
+- **Incident Management**: Create, filter, and export incidents
+- **Student Management**: CRUD operations for students by teachers
+- **Group & Category Management**: Available for coordinators and administrators
+- **Dashboard**: Statistics and analytics for coordinators and administrators
+- **User Management**: Role assignment by administrators
+- **CSV Export**: Apply filters to exported data
 
-## Tecnologías
+## Technology Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS v3.4
-- **Backend**: Supabase (PostgreSQL, Auth, RLS)
+- **Styling**: Tailwind CSS v3.4.1
+- **Backend**: Supabase (PostgreSQL, Auth, Row Level Security)
+- **Development**: ESLint, PostCSS
 - **Deployment**: Vercel (frontend) + Supabase (backend)
 
-## Configuración
+## Setup
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd control-comportamiento
 ```
 
-### 2. Instalar dependencias
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurar Supabase
+### 3. Configure Supabase
 
-1. Crear un proyecto en [supabase.com](https://supabase.com)
-2. Copiar `env.local.example` a `.env.local`
-3. Llenar las variables de entorno con tus credenciales de Supabase:
+1. Create a project at [supabase.com](https://supabase.com)
+2. Copy `env.local.example` to `.env.local`
+3. Fill in the environment variables with your Supabase credentials:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
-SUPABASE_SERVICE_ROLE_KEY=tu_clave_de_servicio_de_supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
-### 4. Configurar la base de datos
+### 4. Configure the database
 
-Ejecutar los scripts SQL en el SQL Editor de Supabase siguiendo las instrucciones en `supabase/README.md`:
+Run the SQL scripts in Supabase SQL Editor following the instructions in `supabase/README.md`:
 
-1. Crear tablas (roles, users, groups, categories, students, incidents)
-2. Insertar roles por defecto (admin, coordinator, teacher)
-3. Configurar RLS (Row Level Security) policies
-4. Crear función de manejo de nuevos usuarios
+1. Create tables (roles, users, groups, categories, students, incidents)
+2. Insert default roles (admin, coordinator, teacher)
+3. Configure RLS (Row Level Security) policies
+4. Create function to handle new user registration
 
-### 5. Ejecutar el proyecto
+### 5. Run the project
 
 ```bash
 npm run dev
 ```
 
-Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Uso
+## Usage
 
-### Flujo de Usuario
+### User Flow
 
-1. **Registro**: Los nuevos usuarios se registran como "Profesor" por defecto
-2. **Login**: Todos los usuarios van a `/incidentes` después del login
-3. **Navegación**: Sidebar muestra opciones según el rol del usuario
+1. **Registration**: New users are registered as "Teacher" by default
+2. **Login**: All users are redirected to `/incidentes` after login
+3. **Navigation**: Sidebar shows options based on user role
 
-### Roles y Permisos
+### Roles and Permissions
 
-#### Profesor (por defecto)
-- Ver y crear incidentes
-- Gestionar estudiantes
-- Filtrar y exportar incidentes
+#### Teacher (default)
+- View and create incidents
+- Manage students
+- Filter and export incidents
 
-#### Coordinador
-- Todas las funciones de Profesor
-- Gestionar grupos
-- Gestionar categorías
-- Ver dashboard con estadísticas
+#### Coordinator
+- All Teacher functions
+- Manage groups
+- Manage categories
+- View dashboard with statistics
 
-#### Administrador
-- Todas las funciones de Coordinador
-- Gestionar usuarios y asignar roles
+#### Administrator
+- All Coordinator functions
+- Manage users and assign roles
 
-### Páginas Principales
+### Main Pages
 
-- **`/`**: Página de inicio con enlace a autenticación
-- **`/auth`**: Login y registro de usuarios
-- **`/incidentes`**: Lista de incidentes con filtros y formulario de creación
-- **`/estudiantes`**: CRUD de estudiantes (profesores)
-- **`/grupos`**: CRUD de grupos (coordinadores+)
-- **`/categorias`**: CRUD de categorías (coordinadores+)
-- **`/dashboard`**: Estadísticas y resúmenes (coordinadores+)
-- **`/usuarios`**: Gestión de usuarios y roles (administradores)
+- **`/`**: Home page with authentication link
+- **`/auth`**: User login and registration
+- **`/incidentes`**: Incident list with filters and creation form
+- **`/estudiantes`**: Student CRUD operations (teachers)
+- **`/grupos`**: Group CRUD operations (coordinators+)
+- **`/categorias`**: Category CRUD operations (coordinators+)
+- **`/dashboard`**: Statistics and summaries (coordinators+)
+- **`/usuarios`**: User management and role assignment (administrators)
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 src/
-├── app/                    # Páginas de Next.js (App Router)
-│   ├── auth/              # Autenticación
-│   ├── incidentes/        # Gestión de incidentes
-│   ├── estudiantes/       # Gestión de estudiantes
-│   ├── grupos/            # Gestión de grupos
-│   ├── categorias/        # Gestión de categorías
-│   ├── dashboard/         # Dashboard con estadísticas
-│   └── usuarios/          # Gestión de usuarios
-├── components/            # Componentes reutilizables
-│   ├── Layout.tsx         # Layout principal con navegación
-│   └── Navigation.tsx     # Navegación basada en roles
-├── lib/                   # Utilidades y configuración
-│   ├── supabase.ts        # Cliente de Supabase (browser)
-│   └── supabase-server.ts # Cliente de Supabase (server)
-└── types/                 # Tipos de TypeScript
-    └── database.ts        # Tipos de la base de datos
+├── app/                    # Next.js pages (App Router)
+│   ├── auth/              # Authentication
+│   │   └── page.tsx       # Login/register page
+│   ├── incidentes/        # Incident management
+│   │   └── page.tsx       # Incident list and creation
+│   ├── estudiantes/       # Student management
+│   │   └── page.tsx       # Student CRUD operations
+│   ├── grupos/            # Group management
+│   │   └── page.tsx       # Group CRUD operations
+│   ├── categorias/        # Category management
+│   │   └── page.tsx       # Category CRUD operations
+│   ├── dashboard/         # Analytics dashboard
+│   │   └── page.tsx       # Statistics and charts
+│   ├── usuarios/          # User management
+│   │   └── page.tsx       # User role assignment
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # Reusable components
+│   ├── Layout.tsx         # Main layout with navigation
+│   └── Navigation.tsx     # Role-based navigation sidebar
+├── lib/                   # Utilities and configuration
+│   ├── supabase.ts        # Supabase client (browser)
+│   └── supabase-server.ts # Supabase client (server)
+└── types/                 # TypeScript types
+    ├── database.ts        # Database types and relationships
+    └── supabase.ts        # Generated Supabase types
+
+Root files:
+├── supabase/              # Database setup
+│   └── README.md          # Database migration instructions
+├── scripts/               # Database utilities
+│   └── seed.sql           # Sample data for testing
+├── reqs/                  # Requirements documentation
+├── package.json           # Dependencies and scripts
+├── next.config.js         # Next.js configuration
+├── tailwind.config.js     # Tailwind CSS configuration
+├── tsconfig.json          # TypeScript configuration
+├── env.local.example      # Environment variables template
+└── SETUP.md               # Detailed setup instructions
 ```
 
-## Despliegue
+## Deployment
 
 ### Frontend (Vercel)
 
-1. Conectar el repositorio a Vercel
-2. Configurar las variables de entorno en Vercel
-3. Desplegar automáticamente
+1. Connect the repository to Vercel
+2. Configure environment variables in Vercel
+3. Deploy automatically
 
 ### Backend (Supabase)
 
-El backend ya está configurado en Supabase. Solo necesitas aplicar las migraciones SQL.
+The backend is already configured in Supabase. You only need to apply the SQL migrations.
 
-## Desarrollo
+## Development
 
-### Scripts Disponibles
+### Available Scripts
 
 ```bash
-npm run dev      # Ejecutar en modo desarrollo
-npm run build    # Construir para producción
-npm run start    # Ejecutar en modo producción
-npm run lint     # Ejecutar linter
+npm run dev      # Run in development mode
+npm run build    # Build for production
+npm run start    # Run in production mode
+npm run lint     # Run ESLint
 ```
 
-### Base de Datos
+### Database Management
 
-La base de datos se gestiona completamente a través de Supabase. Los cambios de esquema se aplican ejecutando SQL en el SQL Editor.
+The database is fully managed through Supabase. Schema changes are applied by running SQL in the SQL Editor.
 
-## Seguridad
+### Key Components
 
-- **RLS (Row Level Security)**: Todas las tablas tienen políticas RLS configuradas
-- **Autenticación**: Supabase Auth maneja la autenticación
-- **Autorización**: Los permisos se verifican tanto en el frontend como en el backend
-- **Validación**: Los formularios tienen validación requerida
+- **Layout.tsx**: Main application layout with authentication check
+- **Navigation.tsx**: Role-based sidebar navigation with user profile
+- **supabase.ts**: Browser-side Supabase client configuration
+- **supabase-server.ts**: Server-side Supabase client for SSR
+- **database.ts**: TypeScript types for all database entities and relationships
 
-## Contribución
+## Security
 
-1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+- **RLS (Row Level Security)**: All tables have RLS policies configured
+- **Authentication**: Supabase Auth handles user authentication
+- **Authorization**: Permissions are verified on both frontend and backend
+- **Validation**: Forms have required field validation
+- **Role-based Access**: Features are restricted based on user roles
+
+## Database Schema
+
+### Core Tables
+- **roles**: User role definitions (admin, coordinator, teacher)
+- **users**: User profiles with role assignments
+- **groups**: Student class/group organization
+- **categories**: Incident categorization
+- **students**: Student records linked to groups
+- **incidents**: Behavior incident records with severity levels
+
+### Key Relationships
+- Users belong to roles (many-to-one)
+- Students belong to groups (many-to-one)
+- Incidents reference students, categories, and teachers (many-to-one each)
+- Groups and categories are created by users (many-to-one)
+
+## Contributing
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## Changelog
 
 For detailed information about changes, fixes, and updates, see [CHANGELOG.md](./CHANGELOG.md).
 
-## Licencia
+## License
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+This project is under the MIT License. See the `LICENSE` file for more details.
