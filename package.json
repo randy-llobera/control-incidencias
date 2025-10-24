@@ -2,11 +2,13 @@
   "name": "control-comportamiento",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.9.4",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
@@ -23,6 +25,7 @@
     "eslint": "^8",
     "eslint-config-next": "15.1.0",
     "postcss": "^8",
+    "prettier": "^3.6.2",
     "supabase": "^2.45.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

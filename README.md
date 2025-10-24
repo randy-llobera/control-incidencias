@@ -76,17 +76,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Roles and Permissions
 
 #### Teacher (default)
+
 - View and create incidents
 - Manage students
 - Filter and export incidents
 
 #### Coordinator
+
 - All Teacher functions
 - Manage groups
 - Manage categories
 - View dashboard with statistics
 
 #### Administrator
+
 - All Coordinator functions
 - Manage users and assign roles
 
@@ -193,6 +196,7 @@ The database is fully managed through Supabase. Schema changes are applied by ru
 ## Database Schema
 
 ### Core Tables
+
 - **roles**: User role definitions (admin, coordinator, teacher)
 - **users**: User profiles with role assignments
 - **groups**: Student class/group organization
@@ -201,6 +205,7 @@ The database is fully managed through Supabase. Schema changes are applied by ru
 - **incidents**: Behavior incident records with severity levels
 
 ### Key Relationships
+
 - Users belong to roles (many-to-one)
 - Students belong to groups (many-to-one)
 - Incidents reference students, categories, and teachers (many-to-one each)

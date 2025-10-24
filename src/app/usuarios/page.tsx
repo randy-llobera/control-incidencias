@@ -1,104 +1,113 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Role, UserWithRole } from '@/types/database'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { Role, UserWithRole } from "@/types/database";
+import { useRouter } from "next/navigation";
 
 export default function UsuariosPage() {
-  const [users, setUsers] = useState<UserWithRole[]>([])
-  const [roles, setRoles] = useState<Role[]>([])
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    checkUser()
-    loadData()
-  }, [])
+    checkUser();
+    loadData();
+  }, []);
 
   const checkUser = async () => {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     if (!authUser) {
-      router.push('/auth')
-      return
+      router.push("/auth");
+      return;
     }
 
     const { data: userData } = await supabase
-      .from('users')
-      .select(`
+      .from("users")
+      .select(
+        `
         *,
         roles(name)
-      `)
-      .eq('id', authUser.id)
-      .single()
+      `,
+      )
+      .eq("id", authUser.id)
+      .single();
 
     // Check if user has permission (admin only)
-    if (userData?.roles?.name !== 'admin') {
-      router.push('/incidentes')
+    if (userData?.roles?.name !== "admin") {
+      router.push("/incidentes");
     }
-  }
+  };
 
   const loadData = async () => {
     try {
       const [usersRes, rolesRes] = await Promise.all([
         supabase
-          .from('users')
-          .select(`
+          .from("users")
+          .select(
+            `
             *,
             roles(name)
-          `)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('roles')
-          .select('*')
-          .order('name')
-      ])
+          `,
+          )
+          .order("created_at", { ascending: false }),
+        supabase.from("roles").select("*").order("name"),
+      ]);
 
-      setUsers(usersRes.data || [])
-      setRoles(rolesRes.data || [])
+      setUsers(usersRes.data || []);
+      setRoles(rolesRes.data || []);
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error("Error loading data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleRoleChange = async (userId: string, newRoleId: string) => {
     try {
       const { error } = await supabase
-        .from('users')
+        .from("users")
         .update({ role_id: newRoleId })
-        .eq('id', userId)
+        .eq("id", userId);
 
-      if (error) throw error
-      loadData()
+      if (error) throw error;
+      loadData();
     } catch (error) {
-      console.error('Error updating user role:', error)
+      console.error("Error updating user role:", error);
     }
-  }
+  };
 
   const getRoleName = (roleName: string) => {
     switch (roleName) {
-      case 'admin': return 'Administrador'
-      case 'coordinator': return 'Coordinador'
-      case 'teacher': return 'Profesor'
-      default: return roleName
+      case "admin":
+        return "Administrador";
+      case "coordinator":
+        return "Coordinador";
+      case "teacher":
+        return "Profesor";
+      default:
+        return roleName;
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Cargando...</div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            Gestión de Usuarios
+          </h1>
 
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
@@ -126,11 +135,13 @@ export default function UsuariosPage() {
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-sm text-gray-500">
-                        Rol actual: {getRoleName(user.roles?.name || '')}
+                        Rol actual: {getRoleName(user.roles?.name || "")}
                       </div>
                       <select
                         value={user.role_id}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        onChange={(e) =>
+                          handleRoleChange(user.id, e.target.value)
+                        }
                         className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                       >
                         {roles.map((role) => (
@@ -153,5 +164,5 @@ export default function UsuariosPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

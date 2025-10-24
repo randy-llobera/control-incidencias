@@ -1,137 +1,141 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Group, UserWithRole, GroupWithUser } from '@/types/database'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { Group, UserWithRole, GroupWithUser } from "@/types/database";
+import { useRouter } from "next/navigation";
 
 export default function GruposPage() {
-  const [groups, setGroups] = useState<GroupWithUser[]>([])
-  const [user, setUser] = useState<UserWithRole | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null)
-  const router = useRouter()
+  const [groups, setGroups] = useState<GroupWithUser[]>([]);
+  const [user, setUser] = useState<UserWithRole | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
-    name: ''
-  })
+    name: "",
+  });
 
   useEffect(() => {
-    checkUser()
-    loadData()
-  }, [])
+    checkUser();
+    loadData();
+  }, []);
 
   const checkUser = async () => {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     if (!authUser) {
-      router.push('/auth')
-      return
+      router.push("/auth");
+      return;
     }
 
     const { data: userData } = await supabase
-      .from('users')
-      .select(`
+      .from("users")
+      .select(
+        `
         *,
         roles(name)
-      `)
-      .eq('id', authUser.id)
-      .single()
+      `,
+      )
+      .eq("id", authUser.id)
+      .single();
 
-    setUser(userData)
+    setUser(userData);
 
     // Check if user has permission (coordinator or admin)
-    if (userData?.roles?.name !== 'coordinator' && userData?.roles?.name !== 'admin') {
-      router.push('/incidentes')
+    if (
+      userData?.roles?.name !== "coordinator" &&
+      userData?.roles?.name !== "admin"
+    ) {
+      router.push("/incidentes");
     }
-  }
+  };
 
   const loadData = async () => {
     try {
       const { data } = await supabase
-        .from('groups')
-        .select(`
+        .from("groups")
+        .select(
+          `
           *,
           users(display_name)
-        `)
-        .order('name')
+        `,
+        )
+        .order("name");
 
-      setGroups(data || [])
+      setGroups(data || []);
     } catch (error) {
-      console.error('Error loading groups:', error)
+      console.error("Error loading groups:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user) return
+    e.preventDefault();
+    if (!user) return;
 
     try {
       if (editingGroup) {
         const { error } = await supabase
-          .from('groups')
+          .from("groups")
           .update(formData)
-          .eq('id', editingGroup.id)
+          .eq("id", editingGroup.id);
 
-        if (error) throw error
+        if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('groups')
-          .insert({
-            ...formData,
-            created_by: user.id
-          })
+        const { error } = await supabase.from("groups").insert({
+          ...formData,
+          created_by: user.id,
+        });
 
-        if (error) throw error
+        if (error) throw error;
       }
 
-      setShowForm(false)
-      setEditingGroup(null)
-      setFormData({ name: '' })
-      loadData()
+      setShowForm(false);
+      setEditingGroup(null);
+      setFormData({ name: "" });
+      loadData();
     } catch (error) {
-      console.error('Error saving group:', error)
+      console.error("Error saving group:", error);
     }
-  }
+  };
 
   const handleEdit = (group: Group) => {
-    setEditingGroup(group)
+    setEditingGroup(group);
     setFormData({
-      name: group.name
-    })
-    setShowForm(true)
-  }
+      name: group.name,
+    });
+    setShowForm(true);
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este grupo?')) return
+    if (!confirm("¿Estás seguro de que quieres eliminar este grupo?")) return;
 
     try {
-      const { error } = await supabase
-        .from('groups')
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from("groups").delete().eq("id", id);
 
-      if (error) throw error
-      loadData()
+      if (error) throw error;
+      loadData();
     } catch (error) {
-      console.error('Error deleting group:', error)
+      console.error("Error deleting group:", error);
     }
-  }
+  };
 
   const resetForm = () => {
-    setShowForm(false)
-    setEditingGroup(null)
-    setFormData({ name: '' })
-  }
+    setShowForm(false);
+    setEditingGroup(null);
+    setFormData({ name: "" });
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Cargando...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -152,16 +156,20 @@ export default function GruposPage() {
           {showForm && (
             <div className="bg-white p-6 rounded-lg shadow mb-6">
               <h3 className="text-lg font-medium mb-4">
-                {editingGroup ? 'Editar Grupo' : 'Nuevo Grupo'}
+                {editingGroup ? "Editar Grupo" : "Nuevo Grupo"}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre del Grupo</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Nombre del Grupo
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Nombre del grupo"
                   />
@@ -178,7 +186,7 @@ export default function GruposPage() {
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
-                    {editingGroup ? 'Actualizar' : 'Crear'}
+                    {editingGroup ? "Actualizar" : "Crear"}
                   </button>
                 </div>
               </form>
@@ -192,7 +200,9 @@ export default function GruposPage() {
                 <li key={group.id} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{group.name}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {group.name}
+                      </p>
                       <p className="text-sm text-gray-600">
                         Creado por: {group.users?.display_name}
                       </p>
@@ -224,5 +234,5 @@ export default function GruposPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

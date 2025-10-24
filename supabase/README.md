@@ -21,7 +21,7 @@ CREATE TABLE roles (
 );
 
 -- Insert default roles
-INSERT INTO roles (name) VALUES 
+INSERT INTO roles (name) VALUES
   ('admin'),
   ('coordinator'),
   ('teacher');
@@ -147,8 +147,8 @@ CREATE POLICY "Teachers can view all groups" ON groups
 CREATE POLICY "Coordinators and admins can manage groups" ON groups
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM users 
-      WHERE users.id = auth.uid() 
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
       AND users.role_id IN (
         SELECT id FROM roles WHERE name IN ('coordinator', 'admin')
       )
@@ -162,8 +162,8 @@ CREATE POLICY "Teachers can view all categories" ON categories
 CREATE POLICY "Coordinators and admins can manage categories" ON categories
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM users 
-      WHERE users.id = auth.uid() 
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
       AND users.role_id IN (
         SELECT id FROM roles WHERE name IN ('coordinator', 'admin')
       )
@@ -213,7 +213,7 @@ DECLARE
 BEGIN
   -- Get the teacher role ID
   SELECT id INTO teacher_role_id FROM public.roles WHERE name = 'teacher' LIMIT 1;
-  
+
   -- Insert user with teacher role as default
   INSERT INTO public.users (id, role_id, display_name, school_role)
   VALUES (NEW.id, teacher_role_id, NEW.raw_user_meta_data->>'display_name', NEW.raw_user_meta_data->>'school_role');

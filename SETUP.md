@@ -56,13 +56,16 @@ Para cambiar roles, un administrador debe ir a la página de Usuarios.
 ## Solución de Problemas
 
 ### Error de conexión a Supabase
+
 - Verifica que las variables de entorno estén correctas
 - Asegúrate de que el proyecto de Supabase esté activo
 
 ### Error de permisos
+
 - Verifica que las políticas RLS estén configuradas correctamente
 - Asegúrate de que el usuario tenga el rol correcto
 
 ### Error de autenticación
+
 - Verifica que la función `handle_new_user()` esté creada
 - Asegúrate de que el trigger esté configurado

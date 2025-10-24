@@ -1,101 +1,116 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { IncidentWithDetails } from '@/types/database'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { IncidentWithDetails } from "@/types/database";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  const [incidents, setIncidents] = useState<IncidentWithDetails[]>([])
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [incidents, setIncidents] = useState<IncidentWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
       if (!authUser) {
-        router.push('/auth')
-        return
+        router.push("/auth");
+        return;
       }
 
       const { data: userData } = await supabase
-        .from('users')
-        .select(`
+        .from("users")
+        .select(
+          `
           *,
           roles(name)
-        `)
-        .eq('id', authUser.id)
-        .single()
+        `,
+        )
+        .eq("id", authUser.id)
+        .single();
 
       // Check if user has permission (coordinator or admin)
-      if (userData?.roles?.name !== 'coordinator' && userData?.roles?.name !== 'admin') {
-        router.push('/incidentes')
+      if (
+        userData?.roles?.name !== "coordinator" &&
+        userData?.roles?.name !== "admin"
+      ) {
+        router.push("/incidentes");
       }
-    }
+    };
 
     const loadData = async () => {
-    try {
-      const { data } = await supabase
-        .from('incidents')
-        .select(`
+      try {
+        const { data } = await supabase
+          .from("incidents")
+          .select(
+            `
           *,
           students(name, groups(name)),
           categories(name)
-        `)
-        .order('created_at', { ascending: false })
+        `,
+          )
+          .order("created_at", { ascending: false });
 
-      setIncidents(data || [])
-    } catch (error) {
-      console.error('Error loading incidents:', error)
-    } finally {
-      setLoading(false)
-    }
-    }
+        setIncidents(data || []);
+      } catch (error) {
+        console.error("Error loading incidents:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    checkUser()
-    loadData()
-  }, [router])
+    checkUser();
+    loadData();
+  }, [router]);
 
   const getStats = () => {
-    const total = incidents.length
+    const total = incidents.length;
     const bySeverity = {
-      low: incidents.filter(i => i.severity === 'low').length,
-      medium: incidents.filter(i => i.severity === 'medium').length,
-      high: incidents.filter(i => i.severity === 'high').length
-    }
+      low: incidents.filter((i) => i.severity === "low").length,
+      medium: incidents.filter((i) => i.severity === "medium").length,
+      high: incidents.filter((i) => i.severity === "high").length,
+    };
 
-    const byCategory: Record<string, number> = incidents.reduce((acc, incident) => {
-      const categoryName = incident.categories?.name || 'Sin categoría'
-      acc[categoryName] = (acc[categoryName] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+    const byCategory: Record<string, number> = incidents.reduce(
+      (acc, incident) => {
+        const categoryName = incident.categories?.name || "Sin categoría";
+        acc[categoryName] = (acc[categoryName] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const byGroup: Record<string, number> = incidents.reduce((acc, incident) => {
-      const groupName = incident.students?.groups?.name || 'Sin grupo'
-      acc[groupName] = (acc[groupName] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
+    const byGroup: Record<string, number> = incidents.reduce(
+      (acc, incident) => {
+        const groupName = incident.students?.groups?.name || "Sin grupo";
+        acc[groupName] = (acc[groupName] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const recentIncidents = incidents.slice(0, 10)
+    const recentIncidents = incidents.slice(0, 10);
 
     return {
       total,
       bySeverity,
       byCategory,
       byGroup,
-      recentIncidents
-    }
-  }
+      recentIncidents,
+    };
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Cargando...</div>
       </div>
-    )
+    );
   }
 
-  const stats = getStats()
+  const stats = getStats();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -115,8 +130,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Incidentes</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Total Incidentes
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.total}
+                      </dd>
                     </dl>
                   </div>
                 </div>
@@ -133,8 +152,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Gravedad Baja</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.bySeverity.low}</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Gravedad Baja
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.bySeverity.low}
+                      </dd>
                     </dl>
                   </div>
                 </div>
@@ -151,8 +174,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Gravedad Media</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.bySeverity.medium}</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Gravedad Media
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.bySeverity.medium}
+                      </dd>
                     </dl>
                   </div>
                 </div>
@@ -169,8 +196,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Gravedad Alta</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.bySeverity.high}</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Gravedad Alta
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.bySeverity.high}
+                      </dd>
                     </dl>
                   </div>
                 </div>
@@ -187,9 +218,14 @@ export default function DashboardPage() {
                 </h3>
                 <div className="space-y-3">
                   {Object.entries(stats.byCategory).map(([category, count]) => (
-                    <div key={category} className="flex justify-between items-center">
+                    <div
+                      key={category}
+                      className="flex justify-between items-center"
+                    >
                       <span className="text-sm text-gray-600">{category}</span>
-                      <span className="text-sm font-medium text-gray-900">{count}</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -204,9 +240,14 @@ export default function DashboardPage() {
                 </h3>
                 <div className="space-y-3">
                   {Object.entries(stats.byGroup).map(([group, count]) => (
-                    <div key={group} className="flex justify-between items-center">
+                    <div
+                      key={group}
+                      className="flex justify-between items-center"
+                    >
                       <span className="text-sm text-gray-600">{group}</span>
-                      <span className="text-sm font-medium text-gray-900">{count}</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -227,15 +268,23 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900">
-                            {incident.students?.name} - {incident.students?.groups?.name}
+                            {incident.students?.name} -{" "}
+                            {incident.students?.groups?.name}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            {incident.categories?.name} • {incident.severity === 'low' ? 'Baja' : incident.severity === 'medium' ? 'Media' : 'Alta'}
+                            {incident.categories?.name} •{" "}
+                            {incident.severity === "low"
+                              ? "Baja"
+                              : incident.severity === "medium"
+                                ? "Media"
+                                : "Alta"}
                           </p>
-                          <p className="text-sm text-gray-700 mt-1">{incident.description}</p>
+                          <p className="text-sm text-gray-700 mt-1">
+                            {incident.description}
+                          </p>
                         </div>
                         <div className="text-sm text-gray-500">
-                          {new Date(incident.date).toLocaleDateString('es-ES')}
+                          {new Date(incident.date).toLocaleDateString("es-ES")}
                         </div>
                       </div>
                     </li>
@@ -252,5 +301,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
