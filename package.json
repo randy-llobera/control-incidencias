@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "types": "supabase gen types typescript --project-id ztnpeivtdpvzaeptwrib --schema public > src/types/supabase.ts",
+    "prebuild": "npm run types"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
