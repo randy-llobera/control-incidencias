@@ -113,6 +113,7 @@ temp/
 
 # Supabase
 .supabase/
+supabase/.temp/
 
 # Documentation and requirements
 reqs/
