@@ -165,6 +165,21 @@ END;
 $function$
 ;
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.id = auth.uid()
+      and r.name = 'admin'
+  );
+$$;
+
 create policy "Coordinators and admins can manage categories"
 on "public"."categories"
 as permissive
