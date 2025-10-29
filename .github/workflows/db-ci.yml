@@ -34,7 +34,10 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest # consider pinning (see Q5 below)
+          version: latest
+
+      - name: Supabase start (services up)
+        run: supabase start -x studio -x imgproxy -x edge-runtime
 
       - name: Supabase DB reset (fresh build)
         run: supabase db reset
