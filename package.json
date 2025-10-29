@@ -13,13 +13,17 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "types": "supabase gen types typescript --project-id ztnpeivtdpvzaeptwrib --schema public > src/types/supabase.ts",
-    "prebuild": "sh -c 'if [ -n \"$SUPABASE_ACCESS_TOKEN\" ] && [ -n \"$SUPABASE_PROJECT_REF\" ]; then npm run types; else echo Skipping Supabase typegen; fi'"
+    "prebuild": "sh -c 'if [ -n \"$SUPABASE_ACCESS_TOKEN\" ] && [ -n \"$SUPABASE_PROJECT_REF\" ]; then npm run types; else echo Skipping Supabase typegen; fi'",
+    "db:ensure-admin": "node scripts/ensure-local-admin.js",
+    "db:seed:local": "node scripts/run-seed.js",
+    "db:reset:local": "supabase db reset && npm run db:ensure-admin && npm run db:seed:local"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/vite": "^4.0.0",
     "next": "^15.5.4",
+    "pg": "^8.16.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -27,6 +31,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^8",
     "eslint-config-next": "15.1.0",
     "postcss": "^8",
