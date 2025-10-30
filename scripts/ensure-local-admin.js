@@ -1,7 +1,7 @@
 // scripts/ensure-local-admin.js
 // Purpose: Ensure a local admin user exists and is promoted to the "admin" role.
 // Usage: npm run db:ensure-admin
-// Requires env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE
+// Requires env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 // Optional env: LOCAL_ADMIN_EMAIL, LOCAL_ADMIN_PASSWORD
 // scripts/ensure-local-admin.js
 
@@ -9,14 +9,14 @@ require("dotenv").config({ path: ".env.local" });
 const { createClient } = require("@supabase/supabase-js");
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const ADMIN_EMAIL = process.env.LOCAL_ADMIN_EMAIL || "admin.local@example.com";
 const ADMIN_PASSWORD = process.env.LOCAL_ADMIN_PASSWORD || "Passw0rd!-local";
 
 if (!URL || !SERVICE_ROLE) {
   console.error(
-    "ERROR: Missing env: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE"
+    "ERROR: Missing env: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
   );
   process.exit(1);
 }
