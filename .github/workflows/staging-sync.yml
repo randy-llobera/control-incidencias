@@ -1,16 +1,15 @@
 name: Promote DB changes to Staging
 
 on:
-  push:
-    branches: [working]
-    paths:
-      - "supabase/**"
-      - "scripts/**"
-      - ".github/workflows/staging-sync.yml"
+  workflow_run:
+    workflows: ["DB CI Gate"]
+    types: [completed]
   workflow_dispatch: {}
 
 jobs:
+  # Runs only after "DB CI Gate" succeeds on branch 'working'
   promote-staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'working' }}
     runs-on: ubuntu-latest
 
     steps:
