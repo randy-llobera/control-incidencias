@@ -3,11 +3,10 @@
 
 -- Insert some sample groups
 INSERT INTO groups (name, created_by) VALUES 
-  ('1º A', (SELECT id FROM users LIMIT 1)),
-  ('1º B', (SELECT id FROM users LIMIT 1)),
-  ('2º A', (SELECT id FROM users LIMIT 1)),
-  ('2º B', (SELECT id FROM users LIMIT 1)),
-  ('3º A', (SELECT id FROM users LIMIT 1));
+  ('ESO 1A', (SELECT id FROM users LIMIT 1)),
+  ('ESO 1B', (SELECT id FROM users LIMIT 1)),
+  ('ESO 2A', (SELECT id FROM users LIMIT 1)),
+  ('ESO 2B', (SELECT id FROM users LIMIT 1));
 
 -- Insert some sample categories
 INSERT INTO categories (name, created_by) VALUES 
@@ -15,7 +14,6 @@ INSERT INTO categories (name, created_by) VALUES
   ('Comportamiento disruptivo', (SELECT id FROM users LIMIT 1)),
   ('Falta de material', (SELECT id FROM users LIMIT 1)),
   ('Agresión verbal', (SELECT id FROM users LIMIT 1)),
-  ('Agresión física', (SELECT id FROM users LIMIT 1)),
   ('Uso inadecuado de dispositivos', (SELECT id FROM users LIMIT 1));
 
 -- Insert some sample students

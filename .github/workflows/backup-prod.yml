@@ -1,0 +1,50 @@
+name: Backup Prod DB
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main] # auto-backup on prod deploys
+  schedule:
+    - cron: "0 3 1 * *" # monthly, 03:00 UTC on day 1
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create dumps (schema + full)
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          PGSSLROOTCERT: ${{ secrets.PGSSLROOTCERT }} # optional strict TLS (path or content not required)
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PROD_DB_URL:-}" ]; then
+            echo "ERROR: Missing PROD_DB_URL secret"; exit 1;
+          fi
+
+          mkdir -p backups
+          TS="$(date -u +%Y%m%d_%H%M%S)"
+
+          # Schema-only (portable .sql)
+          SCHEMA_FILE="prod_schema_${TS}.sql.gz"
+          pg_dump "${PROD_DB_URL}" --schema-only --no-owner --no-privileges | gzip -9 > "backups/${SCHEMA_FILE}"
+          echo "OK: Wrote backups/${SCHEMA_FILE}"
+
+          # Full dump (portable .sql)
+          FULL_FILE="prod_full_${TS}.sql.gz"
+          pg_dump "${PROD_DB_URL}" --no-owner --no-privileges | gzip -9 > "backups/${FULL_FILE}"
+          echo "OK: Wrote backups/${FULL_FILE}"
+
+      - name: Upload backups as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-db-backup
+          path: backups/*.sql.gz
+          if-no-files-found: error
+          compression-level: 0 # already gzipped; avoid double-compression
