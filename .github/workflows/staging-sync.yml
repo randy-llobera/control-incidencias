@@ -66,6 +66,9 @@ jobs:
           echo "Wrote .env.local (masked):"
           sed 's/SUPABASE_SERVICE_ROLE_KEY=.*/SUPABASE_SERVICE_ROLE_KEY=****/; s/LOCAL_ADMIN_PASSWORD=.*/LOCAL_ADMIN_PASSWORD=****/' .env.local
 
+      - name: Seed staging (idempotent)
+        run: npm run db:seed:local
+
       - name: Ensure admin on staging
         run: npm run db:ensure-admin
 
