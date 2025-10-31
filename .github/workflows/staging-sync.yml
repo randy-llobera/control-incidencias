@@ -4,12 +4,18 @@ on:
   workflow_run:
     workflows: ["DB CI Gate"]
     types: [completed]
+  push:
+    branches: [working]
+    paths:
+      - "supabase/**"
+      - "scripts/**"
+      - ".github/workflows/staging-sync.yml"
   workflow_dispatch: {}
 
 jobs:
   # Runs only after "DB CI Gate" succeeds on branch 'working'
   promote-staging:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'working' }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'working') || (github.event_name == 'push' && github.ref == 'refs/heads/working') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:

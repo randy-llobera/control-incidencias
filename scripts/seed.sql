@@ -14,7 +14,6 @@ INSERT INTO categories (name, created_by) VALUES
   ('Comportamiento disruptivo', (SELECT id FROM users LIMIT 1)),
   ('Falta de material', (SELECT id FROM users LIMIT 1)),
   ('Agresión verbal', (SELECT id FROM users LIMIT 1)),
-  ('Agresión física', (SELECT id FROM users LIMIT 1)),
   ('Uso inadecuado de dispositivos', (SELECT id FROM users LIMIT 1));
 
 -- Insert some sample students
