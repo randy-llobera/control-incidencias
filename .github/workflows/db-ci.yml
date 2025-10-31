@@ -64,11 +64,14 @@ jobs:
           echo "Wrote .env.local (masked):"
           sed 's/SUPABASE_SERVICE_ROLE_KEY=.*/SUPABASE_SERVICE_ROLE_KEY=****/; s/LOCAL_ADMIN_PASSWORD=.*/LOCAL_ADMIN_PASSWORD=****/' .env.local
 
-      - name: Re-run seed (idempotent)
+      # 1) First pass: ensure base data (roles, etc.)
+      - name: Seed (base) – idempotent
         run: npm run db:seed:local
 
+      # 2) Ensure local admin (trigger now succeeds because roles exist)
       - name: Ensure local admin (Auth + mirror)
         run: npm run db:ensure-admin
 
-      - name: Re-run seed (idempotent)
+      # 3) Second pass: data that depends on created_by/admin now links correctly
+      - name: Seed (dependent) – idempotent rerun
         run: npm run db:seed:local
