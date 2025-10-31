@@ -38,6 +38,7 @@ jobs:
 
       - name: Link to staging
         env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
           SUPABASE_STAGING_REF: ${{ secrets.SUPABASE_STAGING_REF }}
         run: |
           if [ -z "$SUPABASE_STAGING_REF" ]; then
@@ -46,9 +47,13 @@ jobs:
           supabase link --project-ref "$SUPABASE_STAGING_REF"
 
       - name: Apply migrations to staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
         run: supabase db push
 
       - name: Write staging .env.local for scripts
+        env:
+          STAGING_SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
           {
