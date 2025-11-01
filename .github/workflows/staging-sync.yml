@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: ["DB CI Gate"]
     types: [completed]
-  # Runnig for workflow only
   # push:
   #   branches: [working]
   #   paths:
