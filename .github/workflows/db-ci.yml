@@ -2,17 +2,18 @@ name: DB CI Gate
 
 on:
   pull_request:
-    branches: [working, main]
+    branches: [main] # validate PRs targeting main
     paths:
       - "supabase/**"
       - "scripts/**"
       - ".github/workflows/db-ci.yml"
   push:
-    branches: [working]
+    branches: [working] # validate direct pushes to working
     paths:
       - "supabase/**"
       - "scripts/**"
       - ".github/workflows/db-ci.yml"
+  workflow_dispatch: {} # allow manual runs when needed
 
 jobs:
   db-ci:
@@ -63,8 +64,14 @@ jobs:
           echo "Wrote .env.local (masked):"
           sed 's/SUPABASE_SERVICE_ROLE_KEY=.*/SUPABASE_SERVICE_ROLE_KEY=****/; s/LOCAL_ADMIN_PASSWORD=.*/LOCAL_ADMIN_PASSWORD=****/' .env.local
 
+      # 1) First pass: ensure base data (roles, etc.)
+      - name: Seed (base) – idempotent
+        run: npm run db:seed:local
+
+      # 2) Ensure local admin (trigger now succeeds because roles exist)
       - name: Ensure local admin (Auth + mirror)
         run: npm run db:ensure-admin
 
-      - name: Re-run seed (idempotent)
+      # 3) Second pass: data that depends on created_by/admin now links correctly
+      - name: Seed (dependent) – idempotent rerun
         run: npm run db:seed:local

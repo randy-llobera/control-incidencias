@@ -4,12 +4,12 @@ on:
   workflow_run:
     workflows: ["DB CI Gate"]
     types: [completed]
-  push:
-    branches: [working]
-    paths:
-      - "supabase/**"
-      - "scripts/**"
-      - ".github/workflows/staging-sync.yml"
+  # push:
+  #   branches: [working]
+  #   paths:
+  #     - "supabase/**"
+  #     - "scripts/**"
+  #     - ".github/workflows/staging-sync.yml"
   workflow_dispatch: {}
 
 jobs:
@@ -17,6 +17,9 @@ jobs:
   promote-staging:
     if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'working') || (github.event_name == 'push' && github.ref == 'refs/heads/working') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_STAGING_REF: ${{ secrets.SUPABASE_STAGING_REF }}
 
     steps:
       - name: Checkout
@@ -37,18 +40,23 @@ jobs:
           version: latest
 
       - name: Link to staging
-        env:
-          SUPABASE_STAGING_REF: ${{ secrets.SUPABASE_STAGING_REF }}
         run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ]; then
+            echo "ERROR: SUPABASE_ACCESS_TOKEN is empty/unset (check repo secret STAGING_SUPABASE_ACCESS_TOKEN)"; exit 1;
+          fi
           if [ -z "$SUPABASE_STAGING_REF" ]; then
             echo "ERROR: Missing SUPABASE_STAGING_REF in repo secrets"; exit 1;
           fi
           supabase link --project-ref "$SUPABASE_STAGING_REF"
 
       - name: Apply migrations to staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
         run: supabase db push
 
       - name: Write staging .env.local for scripts
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.STAGING_SUPABASE_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
           {
@@ -61,8 +69,14 @@ jobs:
           echo "Wrote .env.local (masked):"
           sed 's/SUPABASE_SERVICE_ROLE_KEY=.*/SUPABASE_SERVICE_ROLE_KEY=****/; s/LOCAL_ADMIN_PASSWORD=.*/LOCAL_ADMIN_PASSWORD=****/' .env.local
 
-      - name: Ensure admin on staging
+      # 1) First pass: ensure base data (roles, etc.)
+      - name: Seed (base) – idempotent
+        run: npm run db:seed:local
+
+      # 2) Ensure local admin (trigger now succeeds because roles exist)
+      - name: Ensure local admin (Auth + mirror)
         run: npm run db:ensure-admin
 
-      - name: Seed staging (idempotent)
+      # 3) Second pass: data that depends on created_by/admin now links correctly
+      - name: Seed (dependent) – idempotent rerun
         run: npm run db:seed:local

@@ -56,21 +56,42 @@ async function main() {
 
   // 2) If we didn't just create it, look it up from mirrored public.users
   if (!userId) {
-    const { data: existing, error: selErr } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", ADMIN_EMAIL)
-      .maybeSingle();
+    // Look up in Auth by email (public.users has no email column)
+    let foundId = null;
+    try {
+      const { data, error } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
+      if (error) throw error;
+      const match = (data?.users || []).find(
+        (u) => (u.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase()
+      );
+      if (match) foundId = match.id;
+    } catch (e) {
+      console.error("ERROR: Failed to list auth users:", e);
+      process.exit(1);
+    }
 
-    if (selErr) {
-      console.error("ERROR: Failed to query public.users:", selErr);
+    if (!foundId) {
+      console.error(
+        "ERROR: Admin user not found by email and creation failed."
+      );
       process.exit(1);
     }
-    if (!existing) {
-      console.error("ERROR: Admin user not found and creation failed.");
-      process.exit(1);
+    userId = foundId;
+
+    // Ensure the trigger-mirrored row exists in public.users before updating role_id
+    const start = Date.now();
+    while (Date.now() - start < 4000) {
+      const { data: mirrored, error: mirErr } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!mirErr && mirrored?.id) break;
+      await new Promise((r) => setTimeout(r, 200));
     }
-    userId = existing.id;
   }
 
   // 3) Promote to admin (idempotent)
